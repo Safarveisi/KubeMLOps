@@ -10,7 +10,7 @@ components:
       artifacts:
         csv_file:
           artifactType:
-            schemaTitle: system.Artifact
+            schemaTitle: system.Dataset
             schemaVersion: 0.0.1
   comp-persist:
     executorLabel: exec-persist
@@ -18,7 +18,7 @@ components:
       artifacts:
         csv_file:
           artifactType:
-            schemaTitle: system.Artifact
+            schemaTitle: system.Dataset
             schemaVersion: 0.0.1
       parameters:
         key:

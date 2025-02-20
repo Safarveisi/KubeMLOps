@@ -1,7 +1,7 @@
 name: persist
 description: Write csv file into S3
 inputs:
-  - {name: csv_file, type: CSV, description: 'CSV of iris data'}
+  - {name: csv_file, type: Dataset, description: 'CSV of iris data'}
   - {name: key, type: String, description: 'Prefix in S3 in which the final csv is saved'}
 implementation:
   container:

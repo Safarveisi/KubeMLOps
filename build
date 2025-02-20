@@ -1,0 +1,9 @@
+#!/bin/bash
+
+base_dir=$(pwd)
+components_dir=$base_dir/components
+
+# Build and push images of the Kubeflow Pipeline components
+for component in $components_dir/*/; do
+    cd $component && ./build
+done

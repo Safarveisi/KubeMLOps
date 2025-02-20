@@ -1,0 +1,106 @@
+# PIPELINE DEFINITION
+# Name: iris
+# Description: ETL pipeline
+# Inputs:
+#    key: str
+components:
+  comp-download:
+    executorLabel: exec-download
+    outputDefinitions:
+      artifacts:
+        csv_file:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+  comp-persist:
+    executorLabel: exec-persist
+    inputDefinitions:
+      artifacts:
+        csv_file:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+      parameters:
+        key:
+          parameterType: STRING
+deploymentSpec:
+  executors:
+    exec-download:
+      container:
+        command:
+        - python
+        - comp.py
+        - --output_path
+        - '{{$.outputs.artifacts[''csv_file''].path}}'
+        env:
+        - name: ENV
+          value: anything
+        image: ciaa/download:v2.0.0
+    exec-persist:
+      container:
+        command:
+        - python
+        - comp.py
+        - --input_path
+        - '{{$.inputs.artifacts[''csv_file''].path}}'
+        - --key
+        - '{{$.inputs.parameters[''key'']}}'
+        image: ciaa/cleaning:v6.0.0
+pipelineInfo:
+  description: ETL pipeline
+  name: iris
+root:
+  dag:
+    tasks:
+      download:
+        cachingOptions: {}
+        componentRef:
+          name: comp-download
+        taskInfo:
+          name: download
+      persist:
+        cachingOptions: {}
+        componentRef:
+          name: comp-persist
+        dependentTasks:
+        - download
+        inputs:
+          artifacts:
+            csv_file:
+              taskOutputArtifact:
+                outputArtifactKey: csv_file
+                producerTask: download
+          parameters:
+            key:
+              componentInputParameter: key
+        taskInfo:
+          name: persist
+  inputDefinitions:
+    parameters:
+      key:
+        parameterType: STRING
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.11.0
+---
+platforms:
+  kubernetes:
+    deploymentSpec:
+      executors:
+        exec-persist:
+          secretAsEnv:
+          - keyToEnv:
+            - envVar: bucket
+              secretKey: S3_BUCKET
+            secretName: s3-credentials
+          - keyToEnv:
+            - envVar: access_key
+              secretKey: AWS_ACCESS_KEY_ID
+            secretName: s3-credentials
+          - keyToEnv:
+            - envVar: secret_key
+              secretKey: AWS_SECRET_ACCESS_KEY
+            secretName: s3-credentials
+          - keyToEnv:
+            - envVar: endpoint_url
+              secretKey: S3_ENDPOINT_URL
+            secretName: s3-credentials

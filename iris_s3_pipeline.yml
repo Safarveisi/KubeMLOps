@@ -1,8 +1,6 @@
 # PIPELINE DEFINITION
 # Name: iris
 # Description: ETL pipeline
-# Inputs:
-#    key: str
 components:
   comp-download:
     executorLabel: exec-download
@@ -12,6 +10,31 @@ components:
           artifactType:
             schemaTitle: system.Dataset
             schemaVersion: 0.0.1
+  comp-for-loop-2:
+    dag:
+      tasks:
+        persist:
+          cachingOptions: {}
+          componentRef:
+            name: comp-persist
+          inputs:
+            artifacts:
+              csv_file:
+                componentInputArtifact: pipelinechannel--download-csv_file
+            parameters:
+              key:
+                componentInputParameter: pipelinechannel--loop-item-param-1
+          taskInfo:
+            name: persist
+    inputDefinitions:
+      artifacts:
+        pipelinechannel--download-csv_file:
+          artifactType:
+            schemaTitle: system.Dataset
+            schemaVersion: 0.0.1
+      parameters:
+        pipelinechannel--loop-item-param-1:
+          parameterType: STRING
   comp-persist:
     executorLabel: exec-persist
     inputDefinitions:
@@ -58,27 +81,26 @@ root:
           name: comp-download
         taskInfo:
           name: download
-      persist:
-        cachingOptions: {}
+      for-loop-2:
         componentRef:
-          name: comp-persist
+          name: comp-for-loop-2
         dependentTasks:
         - download
         inputs:
           artifacts:
-            csv_file:
+            pipelinechannel--download-csv_file:
               taskOutputArtifact:
                 outputArtifactKey: csv_file
                 producerTask: download
-          parameters:
-            key:
-              componentInputParameter: key
+        iteratorPolicy:
+          parallelismLimit: 3
+        parameterIterator:
+          itemInput: pipelinechannel--loop-item-param-1
+          items:
+            raw: '["ml_platform/iris_0.csv", "ml_platform/iris_1.csv", "ml_platform/iris_2.csv",
+              "ml_platform/iris_3.csv", "ml_platform/iris_4.csv"]'
         taskInfo:
-          name: persist
-  inputDefinitions:
-    parameters:
-      key:
-        parameterType: STRING
+          name: for-loop-2
 schemaVersion: 2.1.0
 sdkVersion: kfp-2.11.0
 ---

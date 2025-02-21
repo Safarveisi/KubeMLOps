@@ -1,0 +1,44 @@
+name: Xgboost train
+description: Train an XGBoost model.
+inputs:
+  - {name: training_data, type: CSV}
+  - {name: label_column, type: Integer, default: 4, optional: true}
+  - {name: num_class, type: Integer, default: 3, optional: true}
+  - {name: num_iterations, type: Integer, default: 10, optional: true}
+  - {name: objective, type: String, default: 'multi:softmax', optional: true}
+  - {name: booster, type: String, default: 'gbtree', optional: true}
+  - {name: learning_rate, type: Float, default: 0.3, optional: true}
+  - {name: min_split_loss, type: Float, default: 0, optional: true}
+  - {name: max_depth, type: Integer, default: 6, optional: true}
+outputs:
+  - {name: model, type: XGBoostModel}
+  - {name: model_config, type: XGBoostModelConfig}
+implementation:
+  container:
+    image: ciaa/train:v2.0.0
+    command:
+    - python
+    - comp.py
+    args:
+    - --training-data
+    - {inputPath: training_data}
+    - --label-column
+    - {inputValue: label_column}
+    - --num-class
+    - {inputValue: num_class}
+    - --num-iterations
+    - {inputValue: num_iterations}
+    - --objective
+    - {inputValue: objective}
+    - --booster
+    - {inputValue: booster}
+    - --learning-rate
+    - {inputValue: learning_rate}
+    - --min-split-loss
+    - {inputValue: min_split_loss}
+    - --max-depth
+    - {inputValue: max_depth}
+    - --model
+    - {outputPath: model}
+    - --model-config
+    - {outputPath: model_config}

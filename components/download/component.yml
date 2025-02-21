@@ -1,13 +1,13 @@
 name: Download
 description: Downloads a compressed file
 outputs:
-  - {name: csv_file, type: Dataset, description: 'CSV of iris data'}
+  - {name: csv_file, type: CSV, description: 'CSV of iris data'}
 implementation:
   container:
-    image: ciaa/download:v2.0.0
-    command: [
-      python,
-      comp.py,
-      --output_path,
-      {outputPath: csv_file}
-    ]
+    image: ciaa/download:v4.0.0
+    command:
+    - python
+    - comp.py
+    args:
+    - --output_path
+    - {outputPath: csv_file}

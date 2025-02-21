@@ -1,0 +1,16 @@
+name: persist
+description: Write csv file into S3
+inputs:
+  - {name: csv_file, type: CSV, description: 'CSV of iris data'}
+  - {name: key, type: String, description: 'Prefix in S3 in which the final csv is saved'}
+implementation:
+  container:
+    image: ciaa/persist:v1.0.0
+    command:
+    - python
+    - comp.py
+    args:
+    - --input_path
+    - {inputPath: csv_file}
+    - --key
+    - {inputValue: key}

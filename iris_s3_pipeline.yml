@@ -8,7 +8,7 @@ components:
       artifacts:
         csv_file:
           artifactType:
-            schemaTitle: system.Dataset
+            schemaTitle: system.Artifact
             schemaVersion: 0.0.1
   comp-for-loop-2:
     dag:
@@ -30,7 +30,7 @@ components:
       artifacts:
         pipelinechannel--download-csv_file:
           artifactType:
-            schemaTitle: system.Dataset
+            schemaTitle: system.Artifact
             schemaVersion: 0.0.1
       parameters:
         pipelinechannel--loop-item-param-1:
@@ -41,34 +41,119 @@ components:
       artifacts:
         csv_file:
           artifactType:
-            schemaTitle: system.Dataset
+            schemaTitle: system.Artifact
             schemaVersion: 0.0.1
       parameters:
         key:
           parameterType: STRING
+  comp-xgboost-train:
+    executorLabel: exec-xgboost-train
+    inputDefinitions:
+      artifacts:
+        training_data:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+      parameters:
+        booster:
+          defaultValue: gbtree
+          isOptional: true
+          parameterType: STRING
+        label_column:
+          defaultValue: 4.0
+          isOptional: true
+          parameterType: NUMBER_INTEGER
+        learning_rate:
+          defaultValue: 0.3
+          isOptional: true
+          parameterType: NUMBER_DOUBLE
+        max_depth:
+          defaultValue: 6.0
+          isOptional: true
+          parameterType: NUMBER_INTEGER
+        min_split_loss:
+          defaultValue: 0.0
+          isOptional: true
+          parameterType: NUMBER_DOUBLE
+        num_class:
+          defaultValue: 3.0
+          isOptional: true
+          parameterType: NUMBER_INTEGER
+        num_iterations:
+          defaultValue: 10.0
+          isOptional: true
+          parameterType: NUMBER_INTEGER
+        objective:
+          defaultValue: multi:softmax
+          isOptional: true
+          parameterType: STRING
+    outputDefinitions:
+      artifacts:
+        model:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+        model_config:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
 deploymentSpec:
   executors:
     exec-download:
       container:
+        args:
+        - --output_path
+        - '{{$.outputs.artifacts[''csv_file''].path}}'
         command:
         - python
         - comp.py
-        - --output_path
-        - '{{$.outputs.artifacts[''csv_file''].path}}'
         env:
         - name: ENV
           value: anything
-        image: ciaa/download:v2.0.0
+        image: ciaa/download:v4.0.0
     exec-persist:
       container:
-        command:
-        - python
-        - comp.py
+        args:
         - --input_path
         - '{{$.inputs.artifacts[''csv_file''].path}}'
         - --key
         - '{{$.inputs.parameters[''key'']}}'
-        image: ciaa/cleaning:v6.0.0
+        command:
+        - python
+        - comp.py
+        image: ciaa/persist:v1.0.0
+    exec-xgboost-train:
+      container:
+        args:
+        - --training-data
+        - '{{$.inputs.artifacts[''training_data''].path}}'
+        - --label-column
+        - '{{$.inputs.parameters[''label_column'']}}'
+        - --num-class
+        - '{{$.inputs.parameters[''num_class'']}}'
+        - --num-iterations
+        - '{{$.inputs.parameters[''num_iterations'']}}'
+        - --objective
+        - '{{$.inputs.parameters[''objective'']}}'
+        - --booster
+        - '{{$.inputs.parameters[''booster'']}}'
+        - --learning-rate
+        - '{{$.inputs.parameters[''learning_rate'']}}'
+        - --min-split-loss
+        - '{{$.inputs.parameters[''min_split_loss'']}}'
+        - --max-depth
+        - '{{$.inputs.parameters[''max_depth'']}}'
+        - --model
+        - '{{$.outputs.artifacts[''model''].path}}'
+        - --model-config
+        - '{{$.outputs.artifacts[''model_config''].path}}'
+        command:
+        - python
+        - comp.py
+        image: ciaa/train:v2.0.0
+        resources:
+          memoryLimit: 1.073741824
+          resourceMemoryLimit: 1Gi
 pipelineInfo:
   description: ETL pipeline
   name: iris
@@ -101,6 +186,31 @@ root:
               "ml_platform/iris_3.csv", "ml_platform/iris_4.csv"]'
         taskInfo:
           name: for-loop-2
+      xgboost-train:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-xgboost-train
+        dependentTasks:
+        - download
+        inputs:
+          artifacts:
+            training_data:
+              taskOutputArtifact:
+                outputArtifactKey: csv_file
+                producerTask: download
+          parameters:
+            label_column:
+              runtimeValue:
+                constant: 4.0
+            num_iterations:
+              runtimeValue:
+                constant: 200.0
+            objective:
+              runtimeValue:
+                constant: multi:softmax
+        taskInfo:
+          name: xgboost-train
 schemaVersion: 2.1.0
 sdkVersion: kfp-2.11.0
 ---

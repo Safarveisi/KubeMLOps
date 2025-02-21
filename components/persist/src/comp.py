@@ -6,15 +6,28 @@ import argparse
 
 
 def main():
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input_path", help="Path to extracted csv files")
-    parser.add_argument("--key", help="Prefix in S3 in which csv is persisted")
+    parser.add_argument(
+        "--input_path",
+        help="Path to the csv file",
+        type=str,
+        required=True,
+        default=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "--key",
+        help="Prefix in S3 in which the csv is persisted",
+        type=str,
+        required=True,
+        default=argparse.SUPPRESS,
+    )
 
     print(f"The bucket name is {os.environ['bucket']}")
 
     args = parser.parse_args()
 
-    df = pd.read_csv(f"{args.input_path}/iris.csv", header=0)
+    df = pd.read_csv(args.input_path, header=0)
 
     s3 = boto3.resource(
         service_name="s3",

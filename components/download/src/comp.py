@@ -6,10 +6,13 @@ import pandas as pd
 import urllib.request
 from pathlib import Path
 
+def _make_parent_dirs_and_return_path(file_path: str):
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    return file_path
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output_path", help="Path to extract csvs")
+    parser.add_argument("--output_path", type=_make_parent_dirs_and_return_path, help="Path to the csv", required=True, default=argparse.SUPPRESS)
 
     print(f'The value of env variable is: {os.environ["ENV"]}')
 
@@ -29,10 +32,10 @@ def main():
         ignore_index=True,
     )
 
-    Path(args.output_path).mkdir(parents=True, exist_ok=True)
-    print(f"Created directory: {args.output_path}")
+    df["y"] = df["y"].astype("category").cat.codes
+
     # Save the pandas df into a csv file
-    df.to_csv(f"{args.output_path}/iris.csv", index=False)
+    df.to_csv(args.output_path, index=False)
 
 
 if __name__ == "__main__":

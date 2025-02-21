@@ -1,0 +1,23 @@
+name: Xgboost predict
+description: Make predictions using a trained XGBoost model.
+inputs:
+- {name: data, type: CSV}
+- {name: model, type: XGBoostModel}
+- {name: label_column, type: Integer, default: 4, optional: true}
+outputs:
+- {name: predictions, type: Predictions}
+implementation:
+  container:
+    image: ciaa/predict:v1.0.0
+    command:
+    - python
+    - comp.py
+    args:
+    - --data
+    - {inputPath: data}
+    - --model
+    - {inputPath: model}
+    - --label-column
+    - {inputValue: label_column}
+    - --predictions
+    - {outputPath: predictions}

@@ -1,6 +1,6 @@
 # PIPELINE DEFINITION
-# Name: iris
-# Description: ETL pipeline
+# Name: iris-classification
+# Description: Train and predict pipeline
 # Inputs:
 #    persist_s3: bool
 components:
@@ -81,6 +81,29 @@ components:
       parameters:
         key:
           parameterType: STRING
+  comp-xgboost-predict:
+    executorLabel: exec-xgboost-predict
+    inputDefinitions:
+      artifacts:
+        data:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+        model:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+      parameters:
+        label_column:
+          defaultValue: 4.0
+          isOptional: true
+          parameterType: NUMBER_INTEGER
+    outputDefinitions:
+      artifacts:
+        predictions:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
   comp-xgboost-train:
     executorLabel: exec-xgboost-train
     inputDefinitions:
@@ -157,6 +180,24 @@ deploymentSpec:
         - python
         - comp.py
         image: ciaa/persist:v1.0.0
+    exec-xgboost-predict:
+      container:
+        args:
+        - --data
+        - '{{$.inputs.artifacts[''data''].path}}'
+        - --model
+        - '{{$.inputs.artifacts[''model''].path}}'
+        - --label-column
+        - '{{$.inputs.parameters[''label_column'']}}'
+        - --predictions
+        - '{{$.outputs.artifacts[''predictions''].path}}'
+        command:
+        - python
+        - comp.py
+        image: ciaa/predict:v1.0.0
+        resources:
+          memoryLimit: 1.073741824
+          resourceMemoryLimit: 1Gi
     exec-xgboost-train:
       container:
         args:
@@ -190,8 +231,8 @@ deploymentSpec:
           memoryLimit: 1.073741824
           resourceMemoryLimit: 1Gi
 pipelineInfo:
-  description: ETL pipeline
-  name: iris
+  description: Train and predict pipeline
+  name: iris-classification
 root:
   dag:
     tasks:
@@ -219,6 +260,30 @@ root:
           name: comp-download
         taskInfo:
           name: download
+      xgboost-predict:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-xgboost-predict
+        dependentTasks:
+        - download
+        - xgboost-train
+        inputs:
+          artifacts:
+            data:
+              taskOutputArtifact:
+                outputArtifactKey: csv_file
+                producerTask: download
+            model:
+              taskOutputArtifact:
+                outputArtifactKey: model
+                producerTask: xgboost-train
+          parameters:
+            label_column:
+              runtimeValue:
+                constant: 4.0
+        taskInfo:
+          name: xgboost-predict
       xgboost-train:
         cachingOptions:
           enableCache: true

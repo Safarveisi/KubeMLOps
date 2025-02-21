@@ -5,7 +5,7 @@ inputs:
   - {name: key, type: String, description: 'Prefix in S3 in which the final csv is saved'}
 implementation:
   container:
-    image: ciaa/persist:v1.0.0
+    image: ciaa/persist:v2.0.0
     command:
     - python
     - comp.py

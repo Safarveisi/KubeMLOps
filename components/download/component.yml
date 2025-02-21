@@ -4,7 +4,7 @@ outputs:
   - {name: csv_file, type: CSV, description: 'CSV of iris data'}
 implementation:
   container:
-    image: ciaa/download:v4.0.0
+    image: ciaa/download:v5.0.0
     command:
     - python
     - comp.py

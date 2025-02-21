@@ -15,7 +15,7 @@ outputs:
   - {name: model_config, type: XGBoostModelConfig}
 implementation:
   container:
-    image: ciaa/train:v2.0.0
+    image: ciaa/train:v3.0.0
     command:
     - python
     - comp.py

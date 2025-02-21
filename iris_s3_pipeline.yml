@@ -1,7 +1,40 @@
 # PIPELINE DEFINITION
 # Name: iris
 # Description: ETL pipeline
+# Inputs:
+#    persist_s3: bool
 components:
+  comp-condition-1:
+    dag:
+      tasks:
+        for-loop-3:
+          componentRef:
+            name: comp-for-loop-3
+          inputs:
+            artifacts:
+              pipelinechannel--download-csv_file:
+                componentInputArtifact: pipelinechannel--download-csv_file
+            parameters:
+              pipelinechannel--persist_s3:
+                componentInputParameter: pipelinechannel--persist_s3
+          iteratorPolicy:
+            parallelismLimit: 3
+          parameterIterator:
+            itemInput: pipelinechannel--loop-item-param-2
+            items:
+              raw: '["ml_platform/iris_0.csv", "ml_platform/iris_1.csv", "ml_platform/iris_2.csv",
+                "ml_platform/iris_3.csv", "ml_platform/iris_4.csv"]'
+          taskInfo:
+            name: for-loop-3
+    inputDefinitions:
+      artifacts:
+        pipelinechannel--download-csv_file:
+          artifactType:
+            schemaTitle: system.Artifact
+            schemaVersion: 0.0.1
+      parameters:
+        pipelinechannel--persist_s3:
+          parameterType: BOOLEAN
   comp-download:
     executorLabel: exec-download
     outputDefinitions:
@@ -10,7 +43,7 @@ components:
           artifactType:
             schemaTitle: system.Artifact
             schemaVersion: 0.0.1
-  comp-for-loop-2:
+  comp-for-loop-3:
     dag:
       tasks:
         persist:
@@ -23,7 +56,7 @@ components:
                 componentInputArtifact: pipelinechannel--download-csv_file
             parameters:
               key:
-                componentInputParameter: pipelinechannel--loop-item-param-1
+                componentInputParameter: pipelinechannel--loop-item-param-2
           taskInfo:
             name: persist
     inputDefinitions:
@@ -33,8 +66,10 @@ components:
             schemaTitle: system.Artifact
             schemaVersion: 0.0.1
       parameters:
-        pipelinechannel--loop-item-param-1:
+        pipelinechannel--loop-item-param-2:
           parameterType: STRING
+        pipelinechannel--persist_s3:
+          parameterType: BOOLEAN
   comp-persist:
     executorLabel: exec-persist
     inputDefinitions:
@@ -160,15 +195,9 @@ pipelineInfo:
 root:
   dag:
     tasks:
-      download:
-        cachingOptions: {}
+      condition-1:
         componentRef:
-          name: comp-download
-        taskInfo:
-          name: download
-      for-loop-2:
-        componentRef:
-          name: comp-for-loop-2
+          name: comp-condition-1
         dependentTasks:
         - download
         inputs:
@@ -177,15 +206,19 @@ root:
               taskOutputArtifact:
                 outputArtifactKey: csv_file
                 producerTask: download
-        iteratorPolicy:
-          parallelismLimit: 3
-        parameterIterator:
-          itemInput: pipelinechannel--loop-item-param-1
-          items:
-            raw: '["ml_platform/iris_0.csv", "ml_platform/iris_1.csv", "ml_platform/iris_2.csv",
-              "ml_platform/iris_3.csv", "ml_platform/iris_4.csv"]'
+          parameters:
+            pipelinechannel--persist_s3:
+              componentInputParameter: persist_s3
         taskInfo:
-          name: for-loop-2
+          name: condition-1
+        triggerPolicy:
+          condition: inputs.parameter_values['pipelinechannel--persist_s3'] == true
+      download:
+        cachingOptions: {}
+        componentRef:
+          name: comp-download
+        taskInfo:
+          name: download
       xgboost-train:
         cachingOptions:
           enableCache: true
@@ -211,6 +244,10 @@ root:
                 constant: multi:softmax
         taskInfo:
           name: xgboost-train
+  inputDefinitions:
+    parameters:
+      persist_s3:
+        parameterType: BOOLEAN
 schemaVersion: 2.1.0
 sdkVersion: kfp-2.11.0
 ---

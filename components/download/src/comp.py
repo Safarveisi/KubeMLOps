@@ -6,13 +6,21 @@ import pandas as pd
 import urllib.request
 from pathlib import Path
 
+
 def _make_parent_dirs_and_return_path(file_path: str):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     return file_path
 
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output_path", type=_make_parent_dirs_and_return_path, help="Path to the csv", required=True, default=argparse.SUPPRESS)
+    parser.add_argument(
+        "--output_path",
+        type=_make_parent_dirs_and_return_path,
+        help="Path to the csv",
+        required=True,
+        default=argparse.SUPPRESS,
+    )
 
     print(f'The value of env variable is: {os.environ["ENV"]}')
 

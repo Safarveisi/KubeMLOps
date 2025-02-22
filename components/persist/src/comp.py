@@ -8,8 +8,8 @@ import argparse
 def main():
 
     _parser = argparse.ArgumentParser(
-        prog="Persit file",
-        description="Persists a csv file in a S3 bucket"
+        prog="Persist file",
+        description="Persist a csv file in a S3 bucket"
     )
     _parser.add_argument(
         "--input_path",

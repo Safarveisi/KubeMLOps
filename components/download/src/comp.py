@@ -14,7 +14,7 @@ def _make_parent_dirs_and_return_path(file_path: str):
 def main():
     _parser = argparse.ArgumentParser(
         prog="Download file",
-        description="Downloads a tar file and coverts it into a csv file"
+        description="Download a tar file and coverts it into a csv file"
     )
     _parser.add_argument(
         "--output_path",

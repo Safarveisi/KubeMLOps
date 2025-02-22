@@ -7,15 +7,18 @@ import argparse
 
 def main():
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
+    _parser = argparse.ArgumentParser(
+        prog="Persit file",
+        description="Persists a csv file in a S3 bucket"
+    )
+    _parser.add_argument(
         "--input_path",
         help="Path to the csv file",
         type=str,
         required=True,
         default=argparse.SUPPRESS,
     )
-    parser.add_argument(
+    _parser.add_argument(
         "--key",
         help="Prefix in S3 in which the csv is persisted",
         type=str,
@@ -25,7 +28,7 @@ def main():
 
     print(f"The bucket name is {os.environ['bucket']}")
 
-    args = parser.parse_args()
+    args = _parser.parse_args()
 
     df = pd.read_csv(args.input_path, header=0)
 

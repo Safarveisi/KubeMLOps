@@ -4,7 +4,6 @@ import tarfile
 import argparse
 import pandas as pd
 import urllib.request
-from pathlib import Path
 
 
 def _make_parent_dirs_and_return_path(file_path: str):
@@ -13,8 +12,11 @@ def _make_parent_dirs_and_return_path(file_path: str):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
+    _parser = argparse.ArgumentParser(
+        prog="Download file",
+        description="Downloads a tar file and coverts it into a csv file"
+    )
+    _parser.add_argument(
         "--output_path",
         type=_make_parent_dirs_and_return_path,
         help="Path to the csv",
@@ -24,7 +26,7 @@ def main():
 
     print(f'The value of env variable is: {os.environ["ENV"]}')
 
-    args = parser.parse_args()
+    args = _parser.parse_args()
 
     url = "https://storage.googleapis.com/ml-pipeline-playground/iris-csv-files.tar.gz"
     # Download the tar file and extract the csv files

@@ -1,4 +1,17 @@
 terraform {
+
+  backend "s3" {
+    bucket = "customerintelligence"
+    key = "ml_platform/terraform.tfstate"
+    region = "eu-central-1"
+    endpoints = {
+      s3 = "http://s3-de-central.profitbricks.com"
+    }
+    encrypt = true
+    skip_credentials_validation = true
+    skip_requesting_account_id = true
+  }
+
   required_providers {
     ionoscloud = {
       source = "ionos-cloud/ionoscloud"
@@ -14,8 +27,8 @@ provider "ionoscloud" {
 }
 
 resource "ionoscloud_k8s_cluster" "example" {
-  name                  = "k8sDeveloperCluster"
-  k8s_version           = "1.31.3"
+  name                  = var.cluster_name
+  k8s_version           = var.k8s_version
   maintenance_window {
     day_of_the_week     = "Sunday"
     time                = "09:00:00Z"
@@ -34,7 +47,7 @@ resource "ionoscloud_k8s_node_pool" "example" {
   cpu_family            = "INTEL_SKYLAKE"
   availability_zone     = "AUTO"
   storage_type          = "SSD"
-  node_count            = 3
+  node_count            = var.node_count > 3 ? 3 : var.node_count
   cores_count           = 8
   ram_size              = 30720
   storage_size          = 100

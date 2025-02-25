@@ -7,7 +7,6 @@ terraform {
     endpoints = {
       s3 = "http://s3-de-central.profitbricks.com"
     }
-    encrypt = true
     skip_credentials_validation = true
     skip_requesting_account_id = true
   }

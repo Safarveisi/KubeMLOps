@@ -7,6 +7,7 @@ package-mode = false
 python = ">=3.9,<3.9.7 || >3.9.7,<3.10"
 requests = "^2.32.3"
 kfp = {extras = ["kubernetes"], version = "^2.11.0"}
+pyyaml = "^6.0.2"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.4"

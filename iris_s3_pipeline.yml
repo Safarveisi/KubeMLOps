@@ -168,7 +168,7 @@ deploymentSpec:
         env:
         - name: ENV
           value: anything
-        image: ciaa/download:v4.0.0
+        image: ciaa/download:v5.0.0
     exec-persist:
       container:
         args:
@@ -179,7 +179,7 @@ deploymentSpec:
         command:
         - python
         - comp.py
-        image: ciaa/persist:v1.0.0
+        image: ciaa/persist:v2.0.0
     exec-xgboost-predict:
       container:
         args:
@@ -194,7 +194,7 @@ deploymentSpec:
         command:
         - python
         - comp.py
-        image: ciaa/predict:v1.0.0
+        image: ciaa/predict:v2.0.0
         resources:
           memoryLimit: 1.073741824
           resourceMemoryLimit: 1Gi
@@ -226,7 +226,7 @@ deploymentSpec:
         command:
         - python
         - comp.py
-        image: ciaa/train:v2.0.0
+        image: ciaa/train:v3.0.0
         resources:
           memoryLimit: 1.073741824
           resourceMemoryLimit: 1Gi

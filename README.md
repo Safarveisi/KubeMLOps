@@ -4,4 +4,4 @@ This repository provides an overview of [Kubeflow](https://www.kubeflow.org/) da
 
 # Pipeline
 
-![Kubeflow components](./pictures/kubepipe.png "Successful execution")
+![Kubeflow components](./pictures/kubepipeline.png "Successful execution")

@@ -21,7 +21,7 @@ terraform {
 
 provider "ionoscloud" {
     # For his authorization to work, 
-    # environment variable TF_VAR_ionos_cloud must be available 
+    # environment variable TF_VAR_ionos_token must be available 
     token = "${var.ionos_token}" 
 }
 
@@ -31,6 +31,9 @@ resource "ionoscloud_k8s_cluster" "example" {
   maintenance_window {
     day_of_the_week     = "Sunday"
     time                = "09:00:00Z"
+  }
+  lifecycle {
+    prevent_destroy = true
   }
 }
 

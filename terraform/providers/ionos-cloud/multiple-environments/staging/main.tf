@@ -21,18 +21,18 @@ terraform {
 
 provider "ionoscloud" {
   # For his authorization to work, environment variable TF_VAR_ionos_token must be available 
-  token = "${var.ionos_token}"
+  token = var.ionos_token
 }
 
 locals {
   environment_name = "staging"
-  node_count = 1
+  node_count       = 1
 }
 
 module "kubeflow_cluster_1" {
   source = "../../kubeflow-cluster-module"
 
-  datacenter_id = "${var.datacenter_id}"
+  datacenter_id = var.datacenter_id
   cluster_name  = upper("k8s-${local.environment_name}")
   k8s_version   = "1.31.3"
   node_count    = local.node_count

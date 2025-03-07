@@ -20,7 +20,7 @@ terraform {
 }
 
 provider "ionoscloud" {
-  # For his authorization to work, environment variable TF_VAR_ionos_token must be available 
+  # For this authorization to work, environment variable TF_VAR_ionos_token must be available 
   token = var.ionos_token
 }
 
